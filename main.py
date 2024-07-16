@@ -3,15 +3,14 @@ from datetime import datetime, timedelta
 
 import discord
 import loguru
-import pandas as pd
 import pytz
 from databases import Database
 from sqlalchemy import insert, select, and_
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 
-from con.config import settings
-from models.user_models import t_discord_users, t_discord_sign_in, t_users
+from app.con import settings
+from app.models import t_discord_users, t_discord_sign_in, t_users
 
 intents = discord.Intents.default()
 intents.members = True
