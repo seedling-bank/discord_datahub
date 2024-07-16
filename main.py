@@ -153,4 +153,4 @@ async def on_message(message):
 
                 await message.author.send("签到成功")
 
-client.run(os.getenv('TOKEN', 'default_token_if_not_set'))
+client.run(os.getenv('TOKEN'))
