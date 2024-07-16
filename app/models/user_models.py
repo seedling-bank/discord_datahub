@@ -1,6 +1,8 @@
 from sqlalchemy import Table, MetaData, Column, INTEGER, String, DATETIME, Integer, DateTime, Text, VARCHAR
 from sqlalchemy.dialects.mysql import BIGINT
-from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy.ext.declarative import declarative_base
+
+Base = declarative_base()
 
 metadata = MetaData()
 
@@ -35,10 +37,6 @@ t_users = Table(
     Column("address", VARCHAR(255, "utf8mb4_unicode_ci")),
     Column("platform", VARCHAR(255, "utf8mb4_unicode_ci")),
 )
-
-
-class Base(DeclarativeBase):
-    pass
 
 
 class t_discord_sign_in(Base):
