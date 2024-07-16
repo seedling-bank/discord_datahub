@@ -1,0 +1,41 @@
+aiohttp==3.9
+Async_OAuthlib==0.0.9
+databases==0.7.0
+fastapi==0.104.1
+Flask==0.12.3
+loguru==0.5.3
+
+requests==2.28.2
+requests_oauthlib==1.3.1
+SQLAlchemy
+starlette_session==0.4.3
+uvicorn
+cachetools~=5.3.1
+aiomysql
+aiokafka~=0.8.1
+async_lru
+pycryptodome
+binance-connector
+ccxt==4.3.15
+websockets
+celery~=5.3.4
+pandas~=2.1.1
+python-jose
+web3~=6.10.0
+python-multipart
+hexbytes~=0.3.1
+starlette~=0.27.0
+numpy~=1.26.0
+PyMySQL~=1.1.0
+openpyxl~=3.1.2
+curl_cffi
+redis>=4.2.0rc1
+TA-Lib
+base58
+solana
+pynacl
+jito_searcher_client == 0.1.4
+openai == 1.35.7
+pydantic-settings == 2.3.4
+discord == 2.3.2
+greenlet == 3.0.3
