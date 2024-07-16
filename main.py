@@ -152,4 +152,4 @@ async def on_message(message):
 
                 await message.author.send("签到成功")
 
-client.run("MTI1OTgzNjkzMDY1MzQyNTcxNQ.GLpIrQ.0fV5mtqq9owVCdpFlNHFaNjN4xgxTWhR0SwXSc")
+client.run("MTI1OTgzNjkzMDY1MzQyNTcxNQ.GUl1mG.mQngRPyczxcq6F40d2PGqzPwDDOqJF6o5OlCYE")
