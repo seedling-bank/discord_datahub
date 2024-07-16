@@ -1,3 +1,4 @@
+import os
 import traceback
 from datetime import datetime, timedelta
 
@@ -152,4 +153,4 @@ async def on_message(message):
 
                 await message.author.send("签到成功")
 
-client.run(settings.TOKEN)
+client.run(os.getenv('TOKEN', 'default_token_if_not_set'))
