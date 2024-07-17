@@ -7,12 +7,14 @@ import loguru
 import pytz
 from databases import Database
 from discord.ext import commands
-from sqlalchemy import insert, select, and_
+from sqlalchemy import insert, select, and_, event
+from sqlalchemy.exc import DisconnectionError
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 
 from app.con.config import settings
 from app.models.user_models import t_discord_users, t_discord_sign_in, t_users
+from app.utils.send_lark_message import send_a_message
 
 intents = discord.Intents.default()
 intents.members = True
@@ -26,6 +28,18 @@ engine = create_async_engine(
     pool_recycle=3600,
     pool_size=10,
 )
+
+
+def checkout_listener(dbapi_connection, connection_record, connection_proxy):
+    try:
+        dbapi_connection.ping(reconnect=True)
+    except dbapi_connection.OperationalError as exc:
+        raise DisconnectionError() from exc
+
+
+# 添加监听事件，在每次从池中获取连接时执行
+event.listen(engine.sync_engine, "checkout", checkout_listener)
+
 async_session = sessionmaker(
     engine, expire_on_commit=False, class_=AsyncSession
 )
@@ -35,89 +49,109 @@ bot = commands.Bot(command_prefix='!', intents=intents)
 
 @bot.event
 async def on_member_join(member):
-    db = Database(f"mysql+aiomysql://cb:cryptoBricks123@34.218.139.166:3306/da_test?charset=utf8mb4")
-    await db.connect()
-
-    utc_time = datetime.utcnow().replace(tzinfo=pytz.utc)
-    formatted_utc_time = utc_time.strftime('%Y-%m-%d %H:%M:%S')
-    timestamp = int(utc_time.timestamp() * 1000)
-
-    information = {
-        "discord_id": member.id,
-        "discord_name": member.name,
-        "joined_at": member.joined_at,
-        "time_at": formatted_utc_time,
-        "create_time": timestamp,
-        "update_time": timestamp
-    }
-
-    query = insert(t_discord_users).values(information)
     try:
-        await db.execute(query)
+
+        utc_time = datetime.utcnow().replace(tzinfo=pytz.utc)
+        formatted_utc_time = utc_time.strftime('%Y-%m-%d %H:%M:%S')
+        timestamp = int(utc_time.timestamp() * 1000)
+
+        information = {
+            "discord_id": member.id,
+            "discord_name": member.name,
+            "joined_at": member.joined_at,
+            "time_at": formatted_utc_time,
+            "create_time": timestamp,
+            "update_time": timestamp
+        }
+        try:
+            async with async_session() as session:
+                query = insert(t_discord_users).values(information)
+                await session.execute(query)
+                await session.commit()
+        except Exception as e:
+            loguru.logger.error(traceback.format_exc())
+            send_a_message(traceback.format_exc())
     except Exception as e:
-        loguru.logger.error(e)
         loguru.logger.error(traceback.format_exc())
+        send_a_message(traceback.format_exc())
 
 
 @bot.event
 async def on_ready():
-    print(f'Logged in as {bot.user}!')
+    loguru.logger.info(f'Logged in as {bot.user}!')
 
 
 @bot.slash_command(name="sign_in", description="Sign in for today")
 async def sign_in(ctx):
-    await ctx.defer(ephemeral=True)
+    try:
+        await ctx.defer(ephemeral=True)
 
-    utc_time = datetime.utcnow().replace(tzinfo=pytz.utc)
-    timestamp = int(utc_time.timestamp() * 1000)
-    formatted_utc_time = utc_time.strftime('%Y-%m-%d %H:%M:%S')
+        utc_time = datetime.utcnow().replace(tzinfo=pytz.utc)
+        timestamp = int(utc_time.timestamp() * 1000)
+        formatted_utc_time = utc_time.strftime('%Y-%m-%d %H:%M:%S')
 
-    user_discord_id = ctx.author.id
-    username = ctx.author.name
-    loguru.logger.info(f"The user with ID {user_discord_id} and username {username} has signed in.")
+        user_discord_id = ctx.author.id
+        username = ctx.author.name
+        loguru.logger.info(f"The user with ID {user_discord_id} and username {username} has signed in.")
 
-    user_query = select(t_users).where(t_users.c.discord_id == user_discord_id)
-    async with async_session() as session:
-        result = await session.execute(user_query)
-        user = result.scalars().first()
-
-    if user is None:
-        await ctx.followup.send("请到官网来保存 Discord", ephemeral=True)
-    else:
-
-        start_of_today_utc = utc_time.replace(hour=0, minute=0, second=0, microsecond=0)
-        end_of_today_utc = start_of_today_utc + timedelta(days=1, microseconds=-1)
-        start_timestamp = int(start_of_today_utc.timestamp() * 1000)
-        end_timestamp = int(end_of_today_utc.timestamp() * 1000)
-
-        query = (
-            select(t_discord_sign_in)
-            .where(
-                and_(
-                    t_discord_sign_in.discord_id == user_discord_id,
-                    t_discord_sign_in.create_time >= start_timestamp,
-                    t_discord_sign_in.create_time <= end_timestamp
-                ))
-        )
-        async with async_session() as session:
-            result = await session.execute(query)
-            sign_in_record = result.scalars().first()
-
-        if sign_in_record is None:
-            information = {
-                "discord_id": user_discord_id,
-                "discord_name": username,
-                "create_time": timestamp,
-                "update_time": timestamp,
-                "time_at": formatted_utc_time,
-            }
+        try:
+            user_query = select(t_users).where(t_users.c.discord_id == user_discord_id)
             async with async_session() as session:
-                query = insert(t_discord_sign_in).values(information)
-                await session.execute(query)
-                await session.commit()
-            await ctx.followup.send("签到成功！", ephemeral=True)
+                result = await session.execute(user_query)
+                user = result.scalars().first()
+        except Exception as e:
+            loguru.logger.error(traceback.format_exc())
+            send_a_message(traceback.format_exc())
+
+        if user is None:
+            await ctx.followup.send("请到官网来保存 Discord", ephemeral=True)
         else:
-            await ctx.followup.send("您今天已经签到过了！", ephemeral=True)
+
+            start_of_today_utc = utc_time.replace(hour=0, minute=0, second=0, microsecond=0)
+            end_of_today_utc = start_of_today_utc + timedelta(days=1, microseconds=-1)
+            start_timestamp = int(start_of_today_utc.timestamp() * 1000)
+            end_timestamp = int(end_of_today_utc.timestamp() * 1000)
+
+            query = (
+                select(t_discord_sign_in)
+                .where(
+                    and_(
+                        t_discord_sign_in.discord_id == user_discord_id,
+                        t_discord_sign_in.create_time >= start_timestamp,
+                        t_discord_sign_in.create_time <= end_timestamp
+                    ))
+            )
+
+            try:
+                async with async_session() as session:
+                    result = await session.execute(query)
+                    sign_in_record = result.scalars().first()
+            except Exception as e:
+                loguru.logger.error(traceback.format_exc())
+                send_a_message(traceback.format_exc())
+
+            if sign_in_record is None:
+                information = {
+                    "discord_id": user_discord_id,
+                    "discord_name": username,
+                    "create_time": timestamp,
+                    "update_time": timestamp,
+                    "time_at": formatted_utc_time,
+                }
+                try:
+                    async with async_session() as session:
+                        query = insert(t_discord_sign_in).values(information)
+                        await session.execute(query)
+                        await session.commit()
+                except Exception as e:
+                    loguru.logger.error(traceback.format_exc())
+                    send_a_message(traceback.format_exc())
+                await ctx.followup.send("签到成功！", ephemeral=True)
+            else:
+                await ctx.followup.send("您今天已经签到过了！", ephemeral=True)
+    except Exception as e:
+        loguru.logger.error(traceback.format_exc())
+        send_a_message(traceback.format_exc())
 
 
 # @client.event
@@ -217,4 +251,4 @@ async def sign_in(ctx):
 #
 #                 await message.author.send("签到成功")
 
-bot.run(os.getenv('TOKEN'))
+bot.run(os.getenv('TOKEN'), reconnect=True)
