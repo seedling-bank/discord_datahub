@@ -1,7 +1,9 @@
+import json
 import os
 import traceback
 from datetime import datetime, timedelta
 
+import aioredis
 import discord
 import loguru
 import pytz
@@ -28,6 +30,10 @@ engine = create_async_engine(
     pool_recycle=3600,
     pool_size=10,
 )
+
+REDIS_URL = "redis://10.244.4.140:6379"
+pool = aioredis.ConnectionPool.from_url(REDIS_URL, max_connections=10)
+redis_client = aioredis.Redis(connection_pool=pool)
 
 
 def checkout_listener(dbapi_connection, connection_record, connection_proxy):
@@ -68,6 +74,8 @@ async def on_member_join(member):
                 query = insert(t_discord_users).values(information)
                 await session.execute(query)
                 await session.commit()
+            message = json.dumps(information)
+            await redis_client.publish('update_discord_user', message)
         except Exception as e:
             loguru.logger.error(traceback.format_exc())
             send_a_message(traceback.format_exc())
@@ -143,6 +151,9 @@ async def sign_in(ctx):
                         query = insert(t_discord_sign_in).values(information)
                         await session.execute(query)
                         await session.commit()
+
+                    message = json.dumps(information)
+                    await redis_client.publish('update_discord_sign_in', message)
                 except Exception as e:
                     loguru.logger.error(traceback.format_exc())
                     send_a_message(traceback.format_exc())
