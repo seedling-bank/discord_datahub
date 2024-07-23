@@ -74,7 +74,7 @@ async def on_member_join(member):
                 query = insert(t_discord_users).values(information)
                 await session.execute(query)
                 await session.commit()
-            message = json.dumps(information)
+            message = json.dumps(information, default=datetime_handler())
             await redis_client.publish('update_discord_user', message)
         except Exception as e:
             loguru.logger.error(traceback.format_exc())
@@ -152,7 +152,7 @@ async def sign_in(ctx):
                         await session.execute(query)
                         await session.commit()
 
-                    message = json.dumps(information)
+                    message = json.dumps(information, default=datetime_handler())
                     await redis_client.publish('update_discord_sign_in', message)
                 except Exception as e:
                     loguru.logger.error(traceback.format_exc())
@@ -163,6 +163,12 @@ async def sign_in(ctx):
     except Exception as e:
         loguru.logger.error(traceback.format_exc())
         send_a_message(traceback.format_exc())
+
+
+def datetime_handler(x):
+    if isinstance(x, datetime):
+        return x.isoformat()
+    raise TypeError("Unknown type")
 
 
 # @client.event
