@@ -71,7 +71,7 @@ async def on_member_join(member):
         }
         try:
             async with async_session() as session:
-                query = insert(t_discord_users).values(information)
+                query = insert(t_discord_users).prefix_with("IGNORE").values(information)
                 await session.execute(query)
                 await session.commit()
             message = json.dumps(information, default=datetime_handler)
