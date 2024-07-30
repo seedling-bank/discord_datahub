@@ -90,7 +90,7 @@ async def on_ready():
     loguru.logger.info(f'Logged in as {bot.user}!')
 
 
-@bot.slash_command(name="GM", description="Sign in for today")
+@bot.slash_command(name="gm", description="Sign in for today")
 async def sign_in(ctx):
     try:
         await ctx.defer(ephemeral=True)
