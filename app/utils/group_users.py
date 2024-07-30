@@ -46,7 +46,7 @@ async def on_ready():
     formatted_utc_time = utc_time.strftime('%Y-%m-%d %H:%M:%S')
     timestamp = int(utc_time.timestamp() * 1000)
 
-    guild = discord.utils.get(client.guilds, name="madrid的服务器")  # 替换为你的服务器名称
+    guild = discord.utils.get(client.guilds, name="Deagent.AI")  # 替换为你的服务器名称
     if guild:
         members = await guild.fetch_members(limit=None).flatten()  # 获取所有成员
         for member in members:

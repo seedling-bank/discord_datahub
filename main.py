@@ -31,7 +31,8 @@ engine = create_async_engine(
     pool_size=10,
 )
 
-REDIS_URL = "redis://10.244.4.140:6379"
+# REDIS_URL = "redis://10.244.4.140:6379"
+REDIS_URL = "redis://10.244.4.202:6379"
 pool = aioredis.ConnectionPool.from_url(REDIS_URL, max_connections=10)
 redis_client = aioredis.Redis(connection_pool=pool)
 
@@ -89,7 +90,7 @@ async def on_ready():
     loguru.logger.info(f'Logged in as {bot.user}!')
 
 
-@bot.slash_command(name="sign_in", description="Sign in for today")
+@bot.slash_command(name="GM", description="Sign in for today")
 async def sign_in(ctx):
     try:
         await ctx.defer(ephemeral=True)
@@ -112,7 +113,7 @@ async def sign_in(ctx):
             send_a_message(traceback.format_exc())
 
         if user is None:
-            await ctx.followup.send("请到官网来保存 Discord", ephemeral=True)
+            await ctx.followup.send("Please come to the DeAgent website to connect Discord.", ephemeral=True)
         else:
 
             start_of_today_utc = utc_time.replace(hour=0, minute=0, second=0, microsecond=0)
@@ -157,9 +158,9 @@ async def sign_in(ctx):
                 except Exception as e:
                     loguru.logger.error(traceback.format_exc())
                     send_a_message(traceback.format_exc())
-                await ctx.followup.send("签到成功！", ephemeral=True)
+                await ctx.followup.send("Sign in successfully!", ephemeral=True)
             else:
-                await ctx.followup.send("您今天已经签到过了！", ephemeral=True)
+                await ctx.followup.send("You have already signed in today.", ephemeral=True)
     except Exception as e:
         loguru.logger.error(traceback.format_exc())
         send_a_message(traceback.format_exc())
