@@ -32,7 +32,7 @@ engine = create_async_engine(
 )
 
 # REDIS_URL = "redis://10.244.4.140:6379"
-REDIS_URL = "redis://10.244.4.202:6379"
+REDIS_URL = "redis://10.244.4.58:6379"
 pool = aioredis.ConnectionPool.from_url(REDIS_URL, max_connections=100000)
 redis_client = aioredis.Redis(connection_pool=pool)
 
