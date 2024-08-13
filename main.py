@@ -25,7 +25,7 @@ intents.message_content = True
 # client = discord.Client(intents=intents)
 
 engine = create_async_engine(
-    "mysql+aiomysql://cb:cryptoBricks123@34.218.139.166:3306/da_test?charset=utf8mb4",
+    "mysql+aiomysql://cb:cryptoBricks123@cb-rds.cw5tnk9dgstt.us-west-2.rds.amazonaws.com/da_test?charset=utf8mb4",
     pool_pre_ping=True,
     pool_recycle=3600,
     pool_size=10,
@@ -75,8 +75,19 @@ async def on_member_join(member):
                 query = insert(t_discord_users).prefix_with("IGNORE").values(information)
                 await session.execute(query)
                 await session.commit()
-            message = json.dumps(information, default=datetime_handler)
-            await redis_client.publish('update_discord_user', message)
+
+                query = select(t_users.c.id).where(t_users.c.discord_id == member.id)
+                try:
+                    async with async_session() as session:
+                        result = await session.execute(query)
+                        user = result.scalars().first()
+
+                    if user:
+                        message = json.dumps(information, default=datetime_handler)
+                        await redis_client.publish(f'update_discord_user_{user}', message)
+                except Exception as e:
+                    loguru.logger.error(traceback.format_exc())
+                    send_a_message(traceback.format_exc())
         except Exception as e:
             loguru.logger.error(traceback.format_exc())
             send_a_message(traceback.format_exc())
@@ -93,7 +104,6 @@ async def on_ready():
 @bot.slash_command(name="gm", description="Sign in for today")
 async def sign_in(ctx):
     try:
-        await ctx.defer(ephemeral=True)
 
         utc_time = datetime.utcnow().replace(tzinfo=pytz.utc)
         timestamp = int(utc_time.timestamp() * 1000)
@@ -104,7 +114,7 @@ async def sign_in(ctx):
         loguru.logger.info(f"The user with ID {user_discord_id} and username {username} has signed in.")
 
         try:
-            user_query = select(t_users).where(t_users.c.discord_id == user_discord_id)
+            user_query = select(t_users.c.id).where(t_users.c.discord_id == user_discord_id)
             async with async_session() as session:
                 result = await session.execute(user_query)
                 user = result.scalars().first()
@@ -113,7 +123,15 @@ async def sign_in(ctx):
             send_a_message(traceback.format_exc())
 
         if user is None:
-            await ctx.followup.send("Please come to the DeAgent website to connect Discord.", ephemeral=True)
+            embed = discord.Embed(
+                title=":dizzy: Wallet Not Linked! :dizzy: ",
+                description="Your Discord account is not linked to a wallet. Please visit https://deagent.ai/reward to link your wallet and then check in.",
+                color=discord.Color.blue()
+            )
+            file = discord.File("20240813-144605.png", filename="image.png")
+            embed.set_image(url="attachment://image.png")
+
+            await ctx.respond(file=file, embed=embed)
         else:
 
             start_of_today_utc = utc_time.replace(hour=0, minute=0, second=0, microsecond=0)
@@ -153,14 +171,42 @@ async def sign_in(ctx):
                         await session.execute(query)
                         await session.commit()
 
-                    message = json.dumps(information, default=datetime_handler)
-                    await redis_client.publish('update_discord_sign_in', message)
+                    query = select(t_users.c.id).where(t_users.c.discord_id == user_discord_id)
+                    try:
+                        async with async_session() as session:
+                            result = await session.execute(query)
+                            user = result.scalars().first()
+
+                        if user:
+                            message = json.dumps(information, default=datetime_handler)
+                            await redis_client.publish(f'update_discord_sign_in_{user}', message)
+                    except Exception as e:
+                        loguru.logger.error(traceback.format_exc())
+                        send_a_message(traceback.format_exc())
                 except Exception as e:
                     loguru.logger.error(traceback.format_exc())
                     send_a_message(traceback.format_exc())
-                await ctx.followup.send("Sign in successfully!", ephemeral=True)
+
+                embed = discord.Embed(
+                    title=":dizzy: Check-in completed! :dizzy: ",
+                    description="Please visit https://deagent.ai/reward to view using the wallet linked to your Discord.",
+                    color=discord.Color.blue()
+                )
+                file = discord.File("20240813-144605.png", filename="image.png")
+                embed.set_image(url="attachment://image.png")
+
+                await ctx.respond(file=file, embed=embed)
             else:
-                await ctx.followup.send("You have already signed in today.", ephemeral=True)
+                embed = discord.Embed(
+                    title=":dizzy: You’ve already checked in.  :dizzy: ",
+                    description="Our daily check-in resets at 12:00 UTC. Please try again after the reset.",
+                    color=discord.Color.blue()
+                )
+                file = discord.File("20240813-144605.png", filename="image.png")
+                embed.set_image(url="attachment://image.png")
+
+                await ctx.respond(file=file, embed=embed)
+
     except Exception as e:
         loguru.logger.error(traceback.format_exc())
         send_a_message(traceback.format_exc())
