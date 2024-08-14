@@ -105,6 +105,8 @@ async def on_ready():
 async def sign_in(ctx):
     try:
 
+        await ctx.defer()
+
         utc_time = datetime.utcnow().replace(tzinfo=pytz.utc)
         timestamp = int(utc_time.timestamp() * 1000)
         formatted_utc_time = utc_time.strftime('%Y-%m-%d %H:%M:%S')
