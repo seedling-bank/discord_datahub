@@ -59,7 +59,7 @@ bot = commands.Bot(command_prefix='!', intents=intents)
 async def on_member_join(member):
     try:
         # DA discord
-        if member.guild.id == "1194935697665167392":
+        if member.guild.id == 1194935697665167392:
             utc_time = datetime.utcnow().replace(tzinfo=pytz.utc)
             formatted_utc_time = utc_time.strftime('%Y-%m-%d %H:%M:%S')
             timestamp = int(utc_time.timestamp() * 1000)
@@ -97,7 +97,7 @@ async def on_member_join(member):
                 send_a_message(traceback.format_exc())
 
         # LUMOZ discord
-        if member.guild.id == "1007087464550256791":
+        if member.guild.id == 1007087464550256791:
 
             utc_time = datetime.utcnow().replace(tzinfo=pytz.utc)
             formatted_utc_time = utc_time.strftime('%Y-%m-%d %H:%M:%S')
@@ -137,7 +137,7 @@ async def on_member_join(member):
                 send_a_message(traceback.format_exc())
 
         # my bot
-        if member.guild.id == "1261163630758723696":
+        if member.guild.id == 1261163630758723696:
 
             loguru.logger.info(f"user id is {member.id} and user name is {member.name} join LUMOZ {formatted_utc_time}")
 
