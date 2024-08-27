@@ -98,7 +98,7 @@ async def on_member_join(member):
 
         # LUMOZ discord
         if member.guild.id == "1007087464550256791":
-            print(2)
+
             utc_time = datetime.utcnow().replace(tzinfo=pytz.utc)
             formatted_utc_time = utc_time.strftime('%Y-%m-%d %H:%M:%S')
             timestamp = int(utc_time.timestamp() * 1000)
@@ -135,6 +135,12 @@ async def on_member_join(member):
             except Exception as e:
                 loguru.logger.error(traceback.format_exc())
                 send_a_message(traceback.format_exc())
+
+        # my bot
+        if member.guild.id == "1261163630758723696":
+
+            loguru.logger.info(f"user id is {member.id} and user name is {member.name} join LUMOZ {formatted_utc_time}")
+
     except Exception as e:
         loguru.logger.error(traceback.format_exc())
         send_a_message(traceback.format_exc())
