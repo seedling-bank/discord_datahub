@@ -18,6 +18,18 @@ t_discord_users = Table(
     Column("time_at", DATETIME()),
 )
 
+t_lumoz_discord_users_info = Table(
+    "lumoz_discord_users_info",
+    metadata,
+    Column("id", INTEGER(), primary_key=True, autoincrement=True),
+    Column("discord_id", INTEGER()),
+    Column("discord_name", INTEGER()),
+    Column("joined_at", INTEGER()),
+    Column("create_time", String(255, "utf8mb4_unicode_520_ci")),
+    Column("update_time", String(255, "utf8mb4_unicode_520_ci")),
+    Column("time_at", DATETIME()),
+)
+
 t_users = Table(
     "users",
     metadata,
