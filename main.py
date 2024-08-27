@@ -59,7 +59,7 @@ bot = commands.Bot(command_prefix='!', intents=intents)
 async def on_member_join(member):
     try:
         # DA discord
-        if member.guild.name == "1194935697665167392":
+        if member.guild.id == "1194935697665167392":
             utc_time = datetime.utcnow().replace(tzinfo=pytz.utc)
             formatted_utc_time = utc_time.strftime('%Y-%m-%d %H:%M:%S')
             timestamp = int(utc_time.timestamp() * 1000)
