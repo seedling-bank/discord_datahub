@@ -51,22 +51,22 @@ async def on_ready():
         members = await guild.fetch_members(limit=None).flatten()  # 获取所有成员
         for member in members:
             print(member.joined_at)
-            information = {
-                "discord_id": member.id,
-                "discord_name": member.name,
-                "joined_at": member.joined_at,
-                "create_time": timestamp,
-                "update_time": timestamp,
-                "time_at": formatted_utc_time
-            }
-            try:
-                async with async_session() as session:
-                    query = insert(t_discord_users).prefix_with("IGNORE").values(information)
-                    await session.execute(query)
-                    await session.commit()
-            except Exception as e:
-                loguru.logger.error(traceback.format_exc())
-                send_a_message(traceback.format_exc())
+            # information = {
+            #     "discord_id": member.id,
+            #     "discord_name": member.name,
+            #     "joined_at": member.joined_at,
+            #     "create_time": timestamp,
+            #     "update_time": timestamp,
+            #     "time_at": formatted_utc_time
+            # }
+            # try:
+            #     async with async_session() as session:
+            #         query = insert(t_discord_users).prefix_with("IGNORE").values(information)
+            #         await session.execute(query)
+            #         await session.commit()
+            # except Exception as e:
+            #     loguru.logger.error(traceback.format_exc())
+            #     send_a_message(traceback.format_exc())
 
             print(f'{member.name}##{member.id}')  # 打印成员用户名和标签
     else:
