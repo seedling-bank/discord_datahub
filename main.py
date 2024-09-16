@@ -166,7 +166,7 @@ async def on_member_join(member):
             formatted_utc_time = utc_time.strftime('%Y-%m-%d %H:%M:%S')
             timestamp = int(utc_time.timestamp() * 1000)
 
-            loguru.logger.info(f"user id is {member.id} and user name is {member.name} join LUMOZ {formatted_utc_time}")
+            loguru.logger.info(f"user id is {member.id} and user name is {member.name} join B2 {formatted_utc_time}")
 
             information = {
                 "discord_id": member.id,
