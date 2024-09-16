@@ -69,6 +69,40 @@ t_users = Table(
     Column("tg_code", VARCHAR(255, "utf8mb4_unicode_ci")),
 )
 
+B2_discord_info = Table(
+    "B2_discord_info",
+    metadata,
+    Column("id", BIGINT(), primary_key=True),
+    Column("social_software", VARCHAR(255, "utf8mb4_unicode_ci")),
+    Column("social_software_id", VARCHAR(255, "utf8mb4_unicode_ci")),
+    Column("social_software_name", VARCHAR(255, "utf8mb4_unicode_ci")),
+    Column("create_time", VARCHAR(255, "utf8mb4_unicode_ci")),
+    Column("update_time", VARCHAR(255, "utf8mb4_unicode_ci")),
+    Column("create_at", DATETIME())
+)
+
+t_B2_user = Table(
+    "B2_user",
+    metadata,
+    Column("id", BIGINT(), primary_key=True),
+    Column("user_id", BIGINT()),
+    Column("discord_id", VARCHAR(255, "utf8mb4_unicode_ci")),
+    Column("discord_name", VARCHAR(255, "utf8mb4_unicode_ci")),
+    Column("tg_id", VARCHAR(255, "utf8mb4_unicode_ci")),
+    Column("tg_username", VARCHAR(255, "utf8mb4_unicode_ci")),
+    Column("twitter_id", BIGINT()),
+    Column("twitter_name", VARCHAR(255, "utf8mb4_unicode_ci")),
+    Column("twitter_username", VARCHAR(255, "utf8mb4_unicode_ci")),
+    Column("discord_code", BIGINT()),
+    Column("twitter_code", BIGINT()),
+    Column("tg_code", BIGINT()),
+    Column("task_discord_code", BIGINT()),
+    Column("task_tg_code", BIGINT()),
+    Column("create_time", VARCHAR(255, "utf8mb4_unicode_ci")),
+    Column("update_time", VARCHAR(255, "utf8mb4_unicode_ci")),
+    Column("create_at", DATETIME()),
+)
+
 
 class t_discord_sign_in(Base):
     __tablename__ = 'discord_sign_in'
