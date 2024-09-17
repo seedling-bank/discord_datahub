@@ -72,13 +72,13 @@ t_users = Table(
 B2_discord_info = Table(
     "B2_discord_info",
     metadata,
-    Column("id", BIGINT(), primary_key=True),
-    Column("social_software", VARCHAR(255, "utf8mb4_unicode_ci")),
-    Column("social_software_id", VARCHAR(255, "utf8mb4_unicode_ci")),
-    Column("social_software_name", VARCHAR(255, "utf8mb4_unicode_ci")),
-    Column("create_time", VARCHAR(255, "utf8mb4_unicode_ci")),
-    Column("update_time", VARCHAR(255, "utf8mb4_unicode_ci")),
-    Column("create_at", DATETIME())
+    Column("id", INTEGER(), primary_key=True, autoincrement=True),
+    Column("discord_id", INTEGER()),
+    Column("discord_name", INTEGER()),
+    Column("joined_at", INTEGER()),
+    Column("create_time", String(255, "utf8mb4_unicode_520_ci")),
+    Column("update_time", String(255, "utf8mb4_unicode_520_ci")),
+    Column("time_at", DATETIME()),
 )
 
 t_B2_user = Table(
