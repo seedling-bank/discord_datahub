@@ -181,7 +181,7 @@ async def on_member_join(member):
                 async with async_session() as session:
 
                     user_data = {
-                        "task_discord_code": 1
+                        "discord_code": 1
                     }
                     query1 = (
                         update(t_B2_user)
