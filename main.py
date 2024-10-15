@@ -12,7 +12,8 @@ from sqlalchemy.exc import DisconnectionError
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 
-from app.models.user_models import t_discord_users, t_discord_sign_in, t_users, t_bitlayer_user, bitlayer_discord_info
+from app.models.user_models import t_discord_users, t_discord_sign_in, t_users, t_bitlayer_user, bitlayer_discord_info, \
+    t_B2_user, B2_discord_info
 from app.utils.send_lark_message import send_a_message
 
 intents = discord.Intents.default()
