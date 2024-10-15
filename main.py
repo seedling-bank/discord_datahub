@@ -1,29 +1,23 @@
-import json
 import os
 import traceback
 from datetime import datetime, timedelta, timezone
 
-import aioredis
 import discord
 import loguru
 import pytz
-from databases import Database
+
 from discord.ext import commands
 from sqlalchemy import insert, select, and_, event, update
 from sqlalchemy.exc import DisconnectionError
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 
-from app.con.config import settings
-from app.models.user_models import t_discord_users, t_discord_sign_in, t_users, t_lumoz_discord_users_info, \
-    t_lumoz_discord_users, t_B2_user, B2_discord_info
+from app.models.user_models import t_discord_users, t_discord_sign_in, t_users, t_bitlayer_user, bitlayer_discord_info
 from app.utils.send_lark_message import send_a_message
 
 intents = discord.Intents.default()
 intents.members = True
 intents.message_content = True
-
-# client = discord.Client(intents=intents)
 
 engine = create_async_engine(
     "mysql+aiomysql://cb:cryptoBricks123@cb-rds.cw5tnk9dgstt.us-west-2.rds.amazonaws.com/da_test?charset=utf8mb4",
@@ -31,12 +25,6 @@ engine = create_async_engine(
     pool_recycle=3600,
     pool_size=10,
 )
-
-
-# REDIS_URL = "redis://10.244.4.140:6379"
-# REDIS_URL = "redis://10.244.4.58:6379"
-# pool = aioredis.ConnectionPool.from_url(REDIS_URL, max_connections=100000)
-# redis_client = aioredis.Redis(connection_pool=pool)
 
 
 def checkout_listener(dbapi_connection, connection_record, connection_proxy):
@@ -108,59 +96,99 @@ async def on_member_join(member):
                 send_a_message(traceback.format_exc())
 
         # LUMOZ discord
-        if member.guild.id == 1007087464550256791:
-
-            utc_time = datetime.utcnow().replace(tzinfo=pytz.utc)
-            formatted_utc_time = utc_time.strftime('%Y-%m-%d %H:%M:%S')
-            timestamp = int(utc_time.timestamp() * 1000)
-
-            loguru.logger.info(f"user id is {member.id} and user name is {member.name} join LUMOZ {formatted_utc_time}")
-
-            information = {
-                "discord_id": member.id,
-                "discord_name": member.name,
-                "joined_at": member.joined_at,
-                "time_at": formatted_utc_time,
-                "create_time": timestamp,
-                "update_time": timestamp
-            }
-            #
-            try:
-                async with async_session() as session:
-
-                    user_data = {
-                        "discord_code": 1
-                    }
-                    query1 = (
-                        update(t_lumoz_discord_users)
-                        .where(t_lumoz_discord_users.c.discord_id == int(member.id))
-                        .values(**user_data)
-                    )
-                    await session.execute(query1)
-                    await session.commit()
-
-                    query = insert(t_lumoz_discord_users_info).prefix_with("IGNORE").values(information)
-                    await session.execute(query)
-                    await session.commit()
-
-                    # query = select(t_users.c.id).where(t_users.c.discord_id == member.id)
-                    # try:
-                    #     async with async_session() as session:
-                    #         result = await session.execute(query)
-                    #         user = result.scalars().first()
-                    #
-                    #     if user:
-                    #         message = json.dumps(information, default=datetime_handler)
-                    #         await redis_client.publish(f'update_discord_user_{user}', message)
-                    # except Exception as e:
-                    #     loguru.logger.error(traceback.format_exc())
-                    #     send_a_message(traceback.format_exc())
-            except Exception as e:
-                loguru.logger.error(traceback.format_exc())
-                send_a_message(traceback.format_exc())
+        # if member.guild.id == 1007087464550256791:
+        #
+        #     utc_time = datetime.utcnow().replace(tzinfo=pytz.utc)
+        #     formatted_utc_time = utc_time.strftime('%Y-%m-%d %H:%M:%S')
+        #     timestamp = int(utc_time.timestamp() * 1000)
+        #
+        #     loguru.logger.info(f"user id is {member.id} and user name is {member.name} join LUMOZ {formatted_utc_time}")
+        #
+        #     information = {
+        #         "discord_id": member.id,
+        #         "discord_name": member.name,
+        #         "joined_at": member.joined_at,
+        #         "time_at": formatted_utc_time,
+        #         "create_time": timestamp,
+        #         "update_time": timestamp
+        #     }
+        #     #
+        #     try:
+        #         async with async_session() as session:
+        #
+        #             user_data = {
+        #                 "discord_code": 1
+        #             }
+        #             query1 = (
+        #                 update(t_lumoz_discord_users)
+        #                 .where(t_lumoz_discord_users.c.discord_id == int(member.id))
+        #                 .values(**user_data)
+        #             )
+        #             await session.execute(query1)
+        #             await session.commit()
+        #
+        #             query = insert(t_lumoz_discord_users_info).prefix_with("IGNORE").values(information)
+        #             await session.execute(query)
+        #             await session.commit()
+        #
+        #             # query = select(t_users.c.id).where(t_users.c.discord_id == member.id)
+        #             # try:
+        #             #     async with async_session() as session:
+        #             #         result = await session.execute(query)
+        #             #         user = result.scalars().first()
+        #             #
+        #             #     if user:
+        #             #         message = json.dumps(information, default=datetime_handler)
+        #             #         await redis_client.publish(f'update_discord_user_{user}', message)
+        #             # except Exception as e:
+        #             #     loguru.logger.error(traceback.format_exc())
+        #             #     send_a_message(traceback.format_exc())
+        #     except Exception as e:
+        #         loguru.logger.error(traceback.format_exc())
+        #         send_a_message(traceback.format_exc())
 
         # B2 discord
-        if member.guild.id == 1166991951149682698:
+        # if member.guild.id == 1166991951149682698:
+        #
+        #     utc_time = datetime.now(timezone.utc)
+        #     formatted_utc_time = utc_time.strftime('%Y-%m-%d %H:%M:%S')
+        #     timestamp = int(utc_time.timestamp() * 1000)
+        #
+        #     loguru.logger.info(f"user id is {member.id} and user name is {member.name} join B2 {formatted_utc_time}")
+        #
+        #     information = {
+        #         "discord_id": member.id,
+        #         "discord_name": member.name,
+        #         "joined_at": member.joined_at,
+        #         "time_at": formatted_utc_time,
+        #         "create_time": timestamp,
+        #         "update_time": timestamp
+        #     }
+        #
+        #     try:
+        #         async with async_session() as session:
+        #
+        #             user_data = {
+        #                 "discord_code": 1
+        #             }
+        #             query1 = (
+        #                 update(t_B2_user)
+        #                 .where(t_B2_user.c.discord_id == int(member.id))
+        #                 .values(**user_data)
+        #             )
+        #             await session.execute(query1)
+        #             await session.commit()
+        #
+        #             query = insert(B2_discord_info).prefix_with("IGNORE").values(information)
+        #             await session.execute(query)
+        #             await session.commit()
+        #
+        #     except Exception as e:
+        #         loguru.logger.error(traceback.format_exc())
+        #         send_a_message(traceback.format_exc())
+
+        # bitlayer discord
+        if member.guild.id == 1189475541233971250:
 
             utc_time = datetime.now(timezone.utc)
             formatted_utc_time = utc_time.strftime('%Y-%m-%d %H:%M:%S')
@@ -184,14 +212,14 @@ async def on_member_join(member):
                         "discord_code": 1
                     }
                     query1 = (
-                        update(t_B2_user)
-                        .where(t_B2_user.c.discord_id == int(member.id))
+                        update(t_bitlayer_user)
+                        .where(t_bitlayer_user.c.discord_id == int(member.id))
                         .values(**user_data)
                     )
                     await session.execute(query1)
                     await session.commit()
 
-                    query = insert(B2_discord_info).prefix_with("IGNORE").values(information)
+                    query = insert(bitlayer_discord_info).prefix_with("IGNORE").values(information)
                     await session.execute(query)
                     await session.commit()
 
@@ -326,7 +354,6 @@ def datetime_handler(x):
     if isinstance(x, datetime):
         return x.isoformat()
     raise TypeError("Unknown type")
-
 
 
 bot.run(os.getenv('TOKEN'), reconnect=True)

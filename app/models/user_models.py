@@ -81,8 +81,43 @@ B2_discord_info = Table(
     Column("time_at", DATETIME()),
 )
 
+bitlayer_discord_info = Table(
+    "bitlayer_discord_info",
+    metadata,
+    Column("id", INTEGER(), primary_key=True, autoincrement=True),
+    Column("discord_id", INTEGER()),
+    Column("discord_name", INTEGER()),
+    Column("joined_at", INTEGER()),
+    Column("create_time", String(255, "utf8mb4_unicode_520_ci")),
+    Column("update_time", String(255, "utf8mb4_unicode_520_ci")),
+    Column("time_at", DATETIME()),
+)
+
 t_B2_user = Table(
     "B2_user",
+    metadata,
+    Column("id", BIGINT(), primary_key=True),
+    Column("user_id", BIGINT()),
+    Column("discord_id", VARCHAR(255, "utf8mb4_unicode_ci")),
+    Column("discord_name", VARCHAR(255, "utf8mb4_unicode_ci")),
+    Column("tg_id", VARCHAR(255, "utf8mb4_unicode_ci")),
+    Column("tg_username", VARCHAR(255, "utf8mb4_unicode_ci")),
+    Column("twitter_id", BIGINT()),
+    Column("twitter_name", VARCHAR(255, "utf8mb4_unicode_ci")),
+    Column("twitter_username", VARCHAR(255, "utf8mb4_unicode_ci")),
+    Column("discord_code", BIGINT()),
+    Column("twitter_code", BIGINT()),
+    Column("tg_code", BIGINT()),
+    Column("task_discord_code", BIGINT()),
+    Column("task_tg_code", BIGINT()),
+    Column("create_time", VARCHAR(255, "utf8mb4_unicode_ci")),
+    Column("update_time", VARCHAR(255, "utf8mb4_unicode_ci")),
+    Column("create_at", DATETIME()),
+)
+
+
+t_bitlayer_user = Table(
+    "bitlayer_user",
     metadata,
     Column("id", BIGINT(), primary_key=True),
     Column("user_id", BIGINT()),
